@@ -16,19 +16,20 @@ This project is a boilerplate for creating AI-powered applications using Next.js
   - `page.tsx`: Main page component rendering the PetNameGenerator
 - `components/`: Contains reusable React components
   - `ui/`: Contains shadcn/ui components
-  - `petNameGenerator.tsx`: Core component for the Pet Name Generator application
+  - `HealthAssistant.tsx`: Core component for the Health assistant application
+  - `ChatBot.tsx` : Contains the bot that you can chat with and ask general questions.
 - `hooks/`: 
   - `useOpenAI.ts`: Custom hook for OpenAI API interactions
 - `prompts/`: 
-  - `petNamePrompt.ts`: Configuration for pet name generation prompts with [structured outputs](https://platform.openai.com/docs/guides/structured-outputs) should use model gpt-4o-2024-08-06 or later
+  - `HealthPrompts.ts`: Configuration for health prompts with [structured outputs](https://platform.openai.com/docs/guides/structured-outputs) should use model gpt-4o-2024-08-06 or later
 
 ## 3. Getting Started
 
 ### 3.1 Clone the repository
 
 ```bash
-git clone https://github.com/moritzfelipe/next-openai-shadcn-boilerplate.git
-cd next-openai-shadcn-boilerplate
+git clone https://github.com/Eugenekarewa/healthassistant.git
+cd healthassistant
 ```
 
 ### 3.2 Install dependencies
@@ -52,12 +53,15 @@ bun install
 ```bash
 OPENAI_API_KEY=your_openai_api_key
 ```
-
+### build the application
+```bash
+npm run build
+```
 ### 3.4 Run the development server
 
 #### 3.4.1 Start the development server
 ```bash
-npm run dev
+npm run start
 # or
 yarn dev
 # or
@@ -81,7 +85,7 @@ bun dev
 #### 4.2.1 Install Cursor from [here](https://cursor.sh/)
 #### 4.2.2 Open the project in Cursor
 #### 4.2.3 Ask Cursor in the chat to implement your installed components with a prompt like this:
-"I want to transform this petname generator boilerplate into a recipe app. You need to change and implement the recipe app file @recipe-app.tsx and create a new prompt file for it."
+"I want to transform this healthassistant boilerplate into a recipe app. You need to change and implement the recipe app file @recipe-app.tsx and create a new prompt file for it."
 
 Make sure to use claude-3.5-sonnet and click on the "ctrl+enter codebase" button.
 It is important to implement the new components and to create a new prompt file for it. Check the promptfile if it is structured correctly. This often causes errors.

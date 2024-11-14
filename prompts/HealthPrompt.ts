@@ -1,5 +1,5 @@
 export const HealthPrompt = {
-  model: "gpt-4o-2024-08-06",
+  model: "gpt-4o-mini-2024-07-18",
   temperature: 1,
   systemPrompt: "You are a compassionate assistant providing mental health support.",
   userPrompt: (query: string) => `Provide advice or support for: ${query}.`,
