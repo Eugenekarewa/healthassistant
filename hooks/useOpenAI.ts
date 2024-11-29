@@ -1,5 +1,10 @@
 import { useState } from 'react';
 
+// Define the OpenAIResponse interface
+interface OpenAIResponse<T> {
+  result: T;
+}
+
 export function useOpenAI<T>() {
   const [result, setResult] = useState<T | null>(null);
   const [loading, setLoading] = useState(false);
@@ -19,13 +24,14 @@ export function useOpenAI<T>() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to generate response');
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to generate response');
       }
 
-      const data = await response.json();
+      const data: OpenAIResponse<T> = await response.json();
       setResult(data.result);
-    } catch (err) {
-      setError('Error generating response');
+    } catch (err: any) {
+      setError(err.message || 'An unexpected error occurred while generating the response');
     } finally {
       setLoading(false);
     }

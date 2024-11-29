@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
 
-// Initialize OpenAI with the API key
+// Initialize OpenAI with the API key from environment variables
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY as string,
 });
@@ -16,15 +16,22 @@ interface OpenAIChatCompletionResponse {
   }[];
 }
 
+// POST handler for OpenAI chat completions
 export async function POST(req: Request) {
   try {
     // Parse the request body
-    const { model, temperature, systemPrompt, userPrompt, responseFormat } = await req.json();
+    const {
+      model = "gpt-4", // Default to GPT-4 if no model is provided
+      temperature = 1, // Default temperature to 1
+      systemPrompt,
+      userPrompt,
+      responseFormat = "json", // Default to JSON response format
+    } = await req.json();
 
     // Log the incoming request body for debugging
     console.log('Received Request:', { model, systemPrompt, userPrompt, temperature, responseFormat });
 
-    // Validate the input
+    // Validate required fields
     if (!model || !systemPrompt || !userPrompt) {
       return NextResponse.json(
         { error: 'Missing required fields: model, systemPrompt, or userPrompt' },
@@ -35,26 +42,28 @@ export async function POST(req: Request) {
     // Make the OpenAI API call
     const completion = (await openai.chat.completions.create({
       model,
-      temperature: temperature || 0.7,
+      temperature,
       messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: userPrompt },
+        { role: "system", content: systemPrompt }, // System instructions
+        { role: "user", content: userPrompt }, // User input
       ],
-      ...(responseFormat && { response_format: responseFormat }),
+      ...(responseFormat && { response_format: responseFormat }), // Optional response format
     })) as OpenAIChatCompletionResponse;
 
-    // Log the API response for debugging
+    // Log the OpenAI API response for debugging
     console.log('OpenAI API Response:', completion);
 
     // Extract and return the response
-    const result = completion.choices?.[0]?.message?.content || "Sorry, no valid response received.";
+    const result = completion.choices?.[0]?.message?.content || "No valid response received.";
     return NextResponse.json({ result });
   } catch (error) {
     console.error('OpenAI API error:', error);
 
     // Return detailed error information
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Failed to generate response' },
+      {
+        error: error instanceof Error ? error.message : 'Failed to generate response',
+      },
       { status: 500 }
     );
   }
