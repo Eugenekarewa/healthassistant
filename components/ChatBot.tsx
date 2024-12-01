@@ -20,6 +20,7 @@ const ChatBot = () => {
   const [mood, setMood] = useState('');
   const [showMeditationPlayer, setShowMeditationPlayer] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -35,17 +36,27 @@ const ChatBot = () => {
     if (userInput.trim()) {
       const userMessage = `User: ${userInput}`;
       setMessages((prevMessages) => [...prevMessages, userMessage]);
-
-      const moodMessage = mood ? `Mood: ${mood}` : 'Mood not provided';
+      setIsLoading(true);
 
       try {
         const response = await fetch('/api/openai', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ query: userInput, mood: moodMessage }),
+          body: JSON.stringify({ 
+            query: userInput,
+            mood: mood || 'Not specified'
+          }),
         });
 
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
         const data = await response.json();
+
+        if (data.error) {
+          throw new Error(data.error);
+        }
 
         setMessages((prevMessages) => [...prevMessages, `Bot: ${data.advice}`]);
 
@@ -54,7 +65,13 @@ const ChatBot = () => {
         }
       } catch (error) {
         console.error('Error fetching chatbot response:', error);
-        setMessages((prevMessages) => [...prevMessages, 'Bot: Sorry, there was an error.']);
+        let errorMessage = 'An unexpected error occurred. Please try again.';
+        if (error instanceof Error) {
+          errorMessage = `Error: ${error.message}`;
+        }
+        setMessages((prevMessages) => [...prevMessages, `Bot: ${errorMessage}`]);
+      } finally {
+        setIsLoading(false);
       }
 
       setUserInput('');
@@ -113,11 +130,17 @@ const ChatBot = () => {
             placeholder="Ask something..."
             className="flex-grow border-teal-400 focus:border-teal-600"
           />
-          <Button onClick={handleSendMessage} size="icon" className="bg-teal-500 text-white hover:bg-teal-400">
+          <Button 
+            onClick={handleSendMessage} 
+            size="icon" 
+            className="bg-teal-500 text-white hover:bg-teal-400"
+            disabled={isLoading}
+          >
             <Send className="h-4 w-4" />
             <span className="sr-only">Send message</span>
           </Button>
         </div>
+        {isLoading && <p className="text-center text-teal-600 mt-2">Thinking...</p>}
         {showMeditationPlayer && (
           <div className="mt-4 rounded-md border bg-teal-50 p-4">
             <h3 className="mb-2 text-lg font-semibold text-teal-600">Guided Meditation</h3>
@@ -125,7 +148,7 @@ const ChatBot = () => {
             <iframe
               width="100%"
               height="215"
-              src="https://www.youtube.com/embed/YourMeditationVideoID"
+              src="https://www.youtube.com/embed/O-6f5wQXSu8"
               frameBorder="0"
               allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
@@ -142,3 +165,4 @@ const ChatBot = () => {
 };
 
 export default ChatBot;
+
